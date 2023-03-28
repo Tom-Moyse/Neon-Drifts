@@ -94,6 +94,6 @@ public class CarController : MonoBehaviour
         // Calculate if in drifting state
         isDrifting = Mathf.Abs(Vector3.Dot(transform.right, rb.velocity)) > minDriftVelocity ||
                        (90 - Mathf.Abs(90 - Vector3.Angle(transform.forward, rb.velocity)) > steerAngle && rb.velocity.magnitude > 5.0f);
-        Debug.Log("Drift vel: " + Mathf.Abs(Vector3.Dot(transform.right, rb.velocity)) + "Drift angle: " + (90 - Mathf.Abs(90 - Vector3.Angle(transform.forward, rb.velocity))));
+        //Debug.Log("Drift vel: " + Mathf.Abs(Vector3.Dot(transform.right, rb.velocity)) + "Drift angle: " + (90 - Mathf.Abs(90 - Vector3.Angle(transform.forward, rb.velocity))));
     }
 }

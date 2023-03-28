@@ -24,13 +24,21 @@ public class DriftScorer : MonoBehaviour
     }
     void FixedUpdate(){
         if (bc.gameObject.GetComponent<CarController>().isDrifting){
+            bool touchedDriftObject = false;
             foreach (IDriftObject driftObject in DriftObjects)
             {
                 if (driftObject.checkZone(bc)){
                     score += 10 * scoreMultiplier * driftObject.calculateDriftScore(transform);
                     scoreMultiplier += 0.01f;
+                    touchedDriftObject = true;
                 }
 
+            }
+
+            // Default drift score calculation
+            if (!touchedDriftObject){
+                float driftAngle = Vector3.Angle(transform.forward, GetComponent<Rigidbody>().velocity);
+                score += 1 * scoreMultiplier * (1 - Mathf.Abs(1 - driftAngle / 90.0f));
             }
 
             driftResetTimer = 0.0f;
@@ -44,7 +52,7 @@ public class DriftScorer : MonoBehaviour
             }
         }
 
-        textScore.text = "Score: " + score.ToString("F2") + " x" + scoreMultiplier.ToString("F2");
+        textScore.text = "Score: " + score.ToString("F0") + " x" + scoreMultiplier.ToString("F2");
     }
 
     private void OnCollisionEnter(Collision collision){
