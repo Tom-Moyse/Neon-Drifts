@@ -4,16 +4,13 @@ using UnityEngine;
 
 public class CarController : MonoBehaviour
 {
-    public float springStrength;
-    public float damperStrength;
-    public float maxSuspensionDistance;
-    public float restSuspensionDistance;
-    public float gripStrength;
-    public float topSpeed;
-    public float engineTorque;
-    public float brakingForce;
-    public float tireMass;
-    public float steerAngle;
+    [SerializeField]
+    private float springStrength, damperStrength, maxSuspensionDistance, restSuspensionDistance,
+        gripStrength, rollingFriction, topSpeed, engineTorque, brakingForce, tireMass, steerAngle,
+        minDriftVelocity;
+
+    [HideInInspector]
+    public bool isDrifting;
     private GameObject wheels;
     private Rigidbody rb;
     // Start is called before the first frame update
@@ -64,19 +61,26 @@ public class CarController : MonoBehaviour
 
 
                 // Acceleration
+                float speed = Vector3.Dot(transform.forward, rb.velocity);
+                float speedPercent = Mathf.Clamp01(Mathf.Abs(speed) / topSpeed);
                 if (Input.GetAxis("Vertical") > 0.0f){
-                    float speed = Vector3.Dot(transform.forward, rb.velocity);
-                    float speedPercent = Mathf.Clamp01(Mathf.Abs(speed) / topSpeed);
                     float torque = (1 - speedPercent) * engineTorque * Input.GetAxis("Vertical");
                     rb.AddForceAtPosition(wheel.forward * torque, wheel.position);
                 }
                 // Braking
                 else if (Input.GetAxis("Vertical") < 0.0f){
-                    float speed = Vector3.Dot(transform.forward, rb.velocity);
-                    if (speed > 0.0f){
-                        rb.AddForceAtPosition(-brakingForce * wheel.forward, wheel.position);
-                    }           
+                    if (speed > -10.0f){
+                        rb.AddForceAtPosition(-brakingForce * wheel.forward, wheel.position);   
+                    }
+                    // else if (speed < 0.0f){
+                    //     rb.AddForceAtPosition(brakingForce * wheel.forward, wheel.position);   
+                    // } 
                 }
+                else{
+                    // Rolling friction
+                    rb.AddForceAtPosition(-speed * gripStrength * tireMass * rollingFriction * wheel.forward, wheel.position);
+                }
+                
             }
         }
 
@@ -86,5 +90,10 @@ public class CarController : MonoBehaviour
 
         wheels.transform.GetChild(2).localRotation = Quaternion.Euler(0.0f, steerRotate, 0.0f);
         wheels.transform.GetChild(3).localRotation = Quaternion.Euler(0.0f, steerRotate, 0.0f);
+
+        // Calculate if in drifting state
+        isDrifting = Mathf.Abs(Vector3.Dot(transform.right, rb.velocity)) > minDriftVelocity ||
+                       (90 - Mathf.Abs(90 - Vector3.Angle(transform.forward, rb.velocity)) > steerAngle && rb.velocity.magnitude > 5.0f);
+        Debug.Log("Drift vel: " + Mathf.Abs(Vector3.Dot(transform.right, rb.velocity)) + "Drift angle: " + (90 - Mathf.Abs(90 - Vector3.Angle(transform.forward, rb.velocity))));
     }
 }

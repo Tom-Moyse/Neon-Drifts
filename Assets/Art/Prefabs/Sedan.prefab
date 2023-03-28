@@ -364,7 +364,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.1721282, y: 1.3089987, z: 5.1654243}
+  m_Size: {x: 1.63, y: 1, z: 4.5}
   m_Center: {x: -0.0000015497208, y: 0.8805966, z: 0.11457074}
 --- !u!54 &4497002558260104286
 Rigidbody:
@@ -376,7 +376,7 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 100
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -394,16 +394,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b10e1e3bb84013458a61c4321345e1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  springStrength: 5000
-  damperStrength: 1000
-  maxSuspensionDistance: 2
-  restSuspensionDistance: 1
-  gripStrength: 0.1
+  springStrength: 10000
+  damperStrength: 500
+  maxSuspensionDistance: 0.8
+  restSuspensionDistance: 0.4
+  gripStrength: 0.4
+  rollingFriction: 0
   topSpeed: 40
-  engineTorque: 1000
-  brakingForce: 100
-  tireMass: 10
-  steerAngle: 35
+  engineTorque: 800
+  brakingForce: 400
+  tireMass: 2.5
+  steerAngle: 30
 --- !u!1 &3223073892004730157
 GameObject:
   m_ObjectHideFlags: 0
