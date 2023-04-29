@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DriftScorer : MonoBehaviour
 {
@@ -9,10 +10,14 @@ public class DriftScorer : MonoBehaviour
     private float score = 0.0f;
     private float scoreMultiplier = 1.0f;
     private float driftResetTimer = 0.0f;
+    private float levelTimer;
+    
 
-    public TMPro.TMP_Text textScore;
+    public TMPro.TMP_Text textInfo;
+
+    public GameController gc;
     [SerializeField]
-    private float driftResetTime;
+    private float driftResetTime, levelTime;
     void Start(){
         bc = GetComponent<BoxCollider>();
         MonoBehaviour[] allScripts = FindObjectsOfType<MonoBehaviour>();
@@ -21,6 +26,7 @@ public class DriftScorer : MonoBehaviour
             if(allScripts[i] is IDriftObject)
                 DriftObjects.Add(allScripts[i] as IDriftObject);
         }
+        levelTimer = levelTime;
     }
     void FixedUpdate(){
         if (bc.gameObject.GetComponent<CarController>().isDrifting){
@@ -28,9 +34,11 @@ public class DriftScorer : MonoBehaviour
             foreach (IDriftObject driftObject in DriftObjects)
             {
                 if (driftObject.checkZone(bc)){
-                    score += 10 * scoreMultiplier * driftObject.calculateDriftScore(transform);
-                    scoreMultiplier += 0.01f;
+                    Vector2 scoreInfo = driftObject.calculateDriftScore(transform);
+                    score += scoreMultiplier * scoreInfo[0];
+                    scoreMultiplier += scoreInfo[1];
                     touchedDriftObject = true;
+                    break;
                 }
 
             }
@@ -52,7 +60,15 @@ public class DriftScorer : MonoBehaviour
             }
         }
 
-        textScore.text = "Score: " + score.ToString("F0") + " x" + scoreMultiplier.ToString("F2");
+        levelTimer -= Time.fixedDeltaTime;
+
+        textInfo.text = "Score: " + score.ToString("F0") + " x" + scoreMultiplier.ToString("F2");
+        textInfo.text += "\nTime: " + levelTimer.ToString("F0");
+
+        if (levelTimer <= 0){
+            Time.timeScale = 0;
+            gc.showSummary((int) score);
+        }
     }
 
     private void OnCollisionEnter(Collision collision){

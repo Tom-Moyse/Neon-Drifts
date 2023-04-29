@@ -2,31 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DriftConeScript : MonoBehaviour, IDriftObject
+public class DriftCone : MonoBehaviour, IDriftObject
 {
-    public float zoneRadius = 5.0f;
+    private float zoneRadius = 5.0f;
     private float lastDistance;
     [SerializeField]
-    private float resetTime;
+    private float resetTime, scoreValue, scoreMultiplier;
     [SerializeField]
     private int maxScoreCalls;
     private bool available = true;
     private int currentScoreCalls = 0;
     private float resetTimer = 0.0f;
-    private Light statusLight;
+    [SerializeField]
+    private Material[] statusMaterials;
+    private MeshRenderer lightDiscRenderer;
     void Start(){
-        statusLight = transform.GetChild(0).GetComponent<Light>();
-        statusLight.color = Color.green;
+        lightDiscRenderer = transform.GetChild(0).GetComponent<MeshRenderer>();
+        lightDiscRenderer.material = statusMaterials[0];
     }
     void Update(){
         if (!available){
             if (resetTimer > resetTime){
                 available = true;
                 resetTimer = 0.0f;
-                statusLight.color = Color.green;
+                lightDiscRenderer.material = statusMaterials[0];
             }
             else{
-                Debug.Log(resetTimer);
                 resetTimer += Time.deltaTime;
             }
         }
@@ -40,12 +41,12 @@ public class DriftConeScript : MonoBehaviour, IDriftObject
         return (distance < zoneRadius);
     }
 
-    public float calculateDriftScore(Transform t){
+    public Vector2 calculateDriftScore(Transform t){
         if (++currentScoreCalls >= maxScoreCalls){
             available = false;
             currentScoreCalls = 0;
-            statusLight.color = Color.cyan;
-            return 0.0f;
+            lightDiscRenderer.material = statusMaterials[1];
+            return Vector2.zero;
         }
         // Calculate score parameters
         float distMult = 1 - (lastDistance/zoneRadius);
@@ -57,6 +58,6 @@ public class DriftConeScript : MonoBehaviour, IDriftObject
         float objectAngleMult = Mathf.Abs(1 - objectAngle / 90.0f);
 
         //Debug.Log(distMult + ", " + driftAngleMult + ", " + objectAngleMult);
-        return distMult * driftAngleMult * objectAngleMult;
+        return new Vector2(distMult * driftAngleMult * objectAngleMult, scoreMultiplier);
     }
 }

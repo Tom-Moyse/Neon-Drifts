@@ -6,8 +6,17 @@ public class CarController : MonoBehaviour
 {
     [SerializeField]
     private float springStrength, damperStrength, maxSuspensionDistance, restSuspensionDistance,
-        gripStrength, rollingFriction, topSpeed, engineTorque, brakingForce, tireMass, steerAngle,
+        rollingFriction, topSpeed, engineTorque, brakingForce, tireMass, steerAngle,
         minDriftVelocity;
+
+    [System.Serializable]
+    private class MatGrip
+    {
+        public Material mat;
+        public float grip;
+    }
+    [SerializeField]
+    private MatGrip[] surfaceMats;
 
     [HideInInspector]
     public bool isDrifting;
@@ -18,6 +27,8 @@ public class CarController : MonoBehaviour
     {
         wheels = transform.GetChild(0).gameObject;
         rb = GetComponent<Rigidbody>();
+
+
         /*
         Debug.Log(rb.position.ToString());
         Debug.Log(wheels.transform.GetChild(0).position.ToString());
@@ -39,6 +50,27 @@ public class CarController : MonoBehaviour
             Ray down = new Ray(wheel.position, -wheel.up);
 
             if (Physics.Raycast(down, out intersect, maxSuspensionDistance)){
+                // Read ray intersect to derive grip
+                Material intersectMat = intersect.transform.GetComponent<Renderer>().sharedMaterial;
+                
+                float gripStrength = 1.0f;
+                foreach (MatGrip mg in surfaceMats){
+                    if (mg.mat.Equals(intersectMat)){
+                        gripStrength = mg.grip;
+                        break;
+                    }
+                }
+                float torque = 1;
+                float currentBrakingForce = brakingForce;
+                if (i == 1 || i == 2){
+                    gripStrength = 0;
+                    currentBrakingForce = 0;
+                }
+                else{
+                    torque = 0;
+                }
+
+
                 // Calculate suspension force
                 float wheelVel = Vector3.Dot(rb.GetPointVelocity(wheel.position), wheel.up);
                 float offset = restSuspensionDistance - intersect.distance;
@@ -64,13 +96,15 @@ public class CarController : MonoBehaviour
                 float speed = Vector3.Dot(transform.forward, rb.velocity);
                 float speedPercent = Mathf.Clamp01(Mathf.Abs(speed) / topSpeed);
                 if (Input.GetAxis("Vertical") > 0.0f){
-                    float torque = (1 - speedPercent) * engineTorque * Input.GetAxis("Vertical");
+                    torque *= (1 - speedPercent) * engineTorque * Input.GetAxis("Vertical");
+                    //float torque = engineTorque * Input.GetAxis("Vertical");
+                    
                     rb.AddForceAtPosition(wheel.forward * torque, wheel.position);
                 }
                 // Braking
                 else if (Input.GetAxis("Vertical") < 0.0f){
                     if (speed > -10.0f){
-                        rb.AddForceAtPosition(-brakingForce * wheel.forward, wheel.position);   
+                        rb.AddForceAtPosition(-currentBrakingForce * wheel.forward, wheel.position);   
                     }
                     // else if (speed < 0.0f){
                     //     rb.AddForceAtPosition(brakingForce * wheel.forward, wheel.position);   
@@ -83,6 +117,15 @@ public class CarController : MonoBehaviour
                 
             }
         }
+        // Cap car velocity
+        /*
+        float speed2 = Vector3.Dot(transform.forward, rb.velocity);
+        float speedPercent2 = Mathf.Abs(speed2) / topSpeed;
+        if (speedPercent2 > 1){
+            float counterAccel = -((speedPercent2 - 1) * Mathf.Abs(speed2)) / Time.fixedDeltaTime;
+            rb.AddForce(transform.forward * rb.mass * counterAccel);
+        }
+        */
 
         // Apply steering
         float steerInput = Input.GetAxis("Horizontal");
