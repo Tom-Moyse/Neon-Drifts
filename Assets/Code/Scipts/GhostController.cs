@@ -22,6 +22,7 @@ public class GhostController : MonoBehaviour
             prevIndex++;
             if (++nextIndex >= keys.Length){
                 Destroy(gameObject);
+                return;
             }
         }
 

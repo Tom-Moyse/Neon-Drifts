@@ -2521,6 +2521,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   car: {fileID: 634035878}
+  sampleHz: 8
 --- !u!4 &1586535344
 Transform:
   m_ObjectHideFlags: 0
@@ -2701,7 +2702,7 @@ PrefabInstance:
       objectReference: {fileID: 953586060}
     - target: {fileID: 1561662794, guid: 75f4ebdc2efff6f49ad9841856e25860, type: 3}
       propertyPath: levelTime
-      value: 10
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 3223073892004402895, guid: 75f4ebdc2efff6f49ad9841856e25860,
         type: 3}

@@ -8,6 +8,9 @@ public class KeyframeRecorder : MonoBehaviour
     private GameObject car;
     private List<ReplayKeyframe> keyframes;
     private float startTime;
+    
+    [SerializeField]
+    private int sampleHz;
 
     public IEnumerator recordKeyframes(){
         startTime = Time.time;
@@ -20,7 +23,7 @@ public class KeyframeRecorder : MonoBehaviour
                                         car.transform.rotation.y, car.transform.rotation.z, 
                                         car.transform.rotation.w, Time.time - startTime);
             keyframes.Add(store);
-            yield return new WaitForSeconds(.1f);
+            yield return new WaitForSeconds(1.0f/sampleHz);
         }
     }
 
